@@ -43,7 +43,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         backgroundColor: Colors.deepPurple,
         appBar: AppBar(
           actions: [
-            _buildToggleButton(widget.questions[_currentIndex])
+            _buildToggleButton()
           ],
         ),
         body: Center(
@@ -68,7 +68,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
-  Widget _buildToggleButton(Question question){
+  Widget _buildToggleButton(){
     return IconButton(
       icon: _answeringMode == true
           ? Icon(Icons.edit)
@@ -78,8 +78,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
         if (_answeringMode == true) {
           setState(() {
             _answeringMode = false;
-            for(int i=0; i<question.candNum; i++){
-              _editCandidates[i]=question.candidates[i];
+            for(int i=0; i<widget.questions[_currentIndex].candNum; i++){
+              _editCandidates[i]=widget.questions[_currentIndex].candidates[i];
             }
           });
         } else {
@@ -89,13 +89,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
             print(_editCandidates);
             for(int i=0; i<_editCandidates.length; i++){
               String s = _editCandidates[i];
-              if(i>=question.candNum){ // 추가된 선택지 반영
-                question.candidates.add(s);
-                question.candNum++;
+              if(i>=widget.questions[_currentIndex].candNum){ // 추가된 선택지 반영
+                widget.questions[_currentIndex].candidates.add(s);
+                widget.questions[_currentIndex].candNum++;
                 _answerState.add(false);
               }
               else if(s!='') {
-                question.candidates[i]=s;
+                widget.questions[_currentIndex].candidates[i]=s;
               }
             }
           });
