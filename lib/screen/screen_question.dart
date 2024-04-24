@@ -24,14 +24,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
   List<int> _answers = [-1, -1, -1];
   List<bool> _answerState = [false, false, false, false];
   bool _answeringMode = true;
-  List<String> editCandidates = [];
+  List<String> _editCandidates =[];
 
   SwiperController _controller = SwiperController();
   _QuestionScreenState();
   _QuestionScreenState.withDetails(this._quesNum, candNum) {
     _answers = List<int>.filled(_quesNum, -1);
     _answerState = List<bool>.filled(candNum, false, growable: true);
-    editCandidates = List<String>.filled(candNum, '', growable: true);
+    _editCandidates = List<String>.filled(candNum, '', growable: true);
   }
 
   @override
@@ -39,41 +39,47 @@ class _QuestionScreenState extends State<QuestionScreen> {
     Size screenSize = MediaQuery.of(context).size;
     double width = screenSize.width;
     double height = screenSize.height;
-
+    
+    
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.deepPurple,
         appBar: AppBar(
           actions: [
             IconButton(
-                onPressed: () {
-                  // when mode is changing 'answering' to 'editing'
-                  if (_answeringMode == true) {
-                    setState(() {
-                      _answeringMode = false;
-                      for(int i=0; i<widget.questions[_currentIndex].candNum; i++){
-                        editCandidates[i]=widget.questions[_currentIndex].candidates[i];
+              icon: _answeringMode == true
+                  ? Icon(Icons.edit)
+                  : Icon(Icons.check),
+              onPressed: () {
+                Question question = widget.questions[_currentIndex]; // 지금 보는 질문지
+                // when mode is changing 'answering' to 'editing'
+                if (_answeringMode == true) {
+                  setState(() {
+                    _answeringMode = false;
+                    for(int i=0; i<question.candNum; i++){
+                      _editCandidates[i]=question.candidates[i];
+                    }
+                  });
+                } else {
+                  // when mode is changing 'editing' to 'answering'
+                  setState(() {
+                    _answeringMode = true;
+                    print(_editCandidates);
+                    for(int i=0; i<_editCandidates.length; i++){
+                      String s = _editCandidates[i];
+                      if(i>=question.candNum){ // 추가된 선택지 반영
+                        question.candidates.add(s);
+                        question.candNum++;
+                        _answerState.add(false);
                       }
-                    });
-                  } else {
-                    // when mode is changing 'editing' to 'answering'
-                    setState(() {
-                      _answeringMode = true;
-                      print(editCandidates);
-                      for(int i=0; i<editCandidates.length; i++){
-                        String s = editCandidates[i];
-                        if(s!='') widget.questions[_currentIndex].candidates[i]=s;
-                        if(i>=widget.questions[_currentIndex].candidates[i].length){ // 추가된 선택지 반영
-                          widget.questions[_currentIndex].candidates.add(s);
-                          _answerState.add(false);
-                        }
+                      else if(s!='') {
+                        question.candidates[i]=s;
                       }
-                    });
-                  }
-                },
-                icon: _answeringMode == true
-                    ? Icon(Icons.edit)
-                    : Icon(Icons.check))
+                    }
+                  });
+                }
+              },
+            )
           ],
         ),
         body: Center(
@@ -82,7 +88,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.deepPurple)),
               width: width * 0.85,
-              height: height * 0.5,
+              height: height * 0.75,
               child: Swiper(
                 controller: _controller,
                 physics: NeverScrollableScrollPhysics(),
@@ -132,10 +138,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
               ),
             ),
           ),
-          // 빈 Container인데, 이게 있어야 이후에 배치될 children들을 아래쪽으로 배치시킴.
-          Expanded(
-            child: Container(),
-          ),
+          // Expanded(// 빈 Container인데, 이게 있어야 이후에 배치될 children들을 아래쪽으로 배치시킴.
+          //   child: Container(),
+          // ),
           Column(
             children: _buildCandidates(width, question),
           ),
@@ -186,55 +191,59 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   List<Widget> _buildCandidates(double width, Question question) {
     List<Widget> _children = [];
-
-    for (int i = 0; i < question.candNum; i++) {
-      _children.add(_answeringMode
-          ? CandWidget(
-              index: i,
-              width: width,
-              text: question.candidates[i],
-              answerState: _answerState[i],
-              tap: () {
-                setState(() { // tap한 선택지는 true로 나머지는 false로 토글하고 선택한 답 저장
-                  for (int j = 0; j < question.candNum; j++) {
-                    if (j == i) {
-                      _answerState[j] = true;
-                      _answers[_currentIndex] = j;
-                      // print(_answers[_currentIndex]); // 누른 선택지 확인
-                      //print(width); //  기기 너비 확인
-                    } else {
-                      _answerState[j] = false;
-                    }
-                  }
-                });
-              },
-            )
-          : EditCandWidget(
-            index: i,
-            width: width,
-            hintText: editCandidates[i],
-            onSubmitted: (value) {
-              setState(() {
-                print(value);
-                editCandidates[i] = value;
-              });
-            },
-          ));
+    if(_answeringMode==true){
+      for (int i = 0; i < question.candNum; i++) {
+        _children.add(CandWidget(
+          index: i,
+          width: width,
+          text: question.candidates[i],
+          answerState: _answerState[i],
+          tap: () {
+            setState(() { // tap한 선택지는 true로 나머지는 false로 토글하고 선택한 답 저장
+              for (int j = 0; j < question.candNum; j++) {
+                if (j == i) {
+                  _answerState[j] = true;
+                  _answers[_currentIndex] = j;
+                  // print(_answers[_currentIndex]); // 누른 선택지 확인
+                  //print(width); //  기기 너비 확인
+                } else {
+                  _answerState[j] = false;
+                }
+              }
+            });
+          },
+        )
+      );
       _children.add(Padding(
         padding: EdgeInsets.all(width * 0.024),
       ));
     }
-    !_answeringMode
-        ? _children.add(IconButton(
-            onPressed: () {
+    } else{
+      for (int i = 0; i < _editCandidates.length; i++) {
+        _children.add(
+          EditCandWidget(
+            index: i,
+            width: width,
+            hintText: _editCandidates[i],
+            onSubmitted: (value) {
               setState(() {
-                question.candNum++; // 재렌더링할 때 candNum 값을 기준으로 for문이 돌아서 이걸 증가시켜줘야 됐음. 
-                // TODO : 나중에 아예 EditCandWidget이랑 CandWidget이랑 분리시켜서 여기서 candNum을 증가시키지 않아도 되게 수정
-                editCandidates.add('');
+                print(_editCandidates);
+                _editCandidates[i] = value;
               });
             },
-            icon: Icon(Icons.add)))
-        : null;
+          ));
+        _children.add(Padding(
+          padding: EdgeInsets.all(width * 0.024),
+        ));
+      }
+      _children.add(IconButton(
+        onPressed: () {
+          setState(() {
+            _editCandidates.add('');
+          });
+        },
+        icon: Icon(Icons.add)));
+    }
     return _children;
   }
 }
