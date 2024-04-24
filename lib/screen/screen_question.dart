@@ -1,10 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:my_diary/model/model_question.dart';
-import 'package:my_diary/screen/screen_edit.dart';
 import 'package:my_diary/widget/widget_candidate.dart';
 import 'package:my_diary/widget/widget_edit_cand.dart';
 
@@ -46,65 +43,71 @@ class _QuestionScreenState extends State<QuestionScreen> {
         backgroundColor: Colors.deepPurple,
         appBar: AppBar(
           actions: [
-            IconButton(
-              icon: _answeringMode == true
-                  ? Icon(Icons.edit)
-                  : Icon(Icons.check),
-              onPressed: () {
-                Question question = widget.questions[_currentIndex]; // 지금 보는 질문지
-                // when mode is changing 'answering' to 'editing'
-                if (_answeringMode == true) {
-                  setState(() {
-                    _answeringMode = false;
-                    for(int i=0; i<question.candNum; i++){
-                      _editCandidates[i]=question.candidates[i];
-                    }
-                  });
-                } else {
-                  // when mode is changing 'editing' to 'answering'
-                  setState(() {
-                    _answeringMode = true;
-                    print(_editCandidates);
-                    for(int i=0; i<_editCandidates.length; i++){
-                      String s = _editCandidates[i];
-                      if(i>=question.candNum){ // 추가된 선택지 반영
-                        question.candidates.add(s);
-                        question.candNum++;
-                        _answerState.add(false);
-                      }
-                      else if(s!='') {
-                        question.candidates[i]=s;
-                      }
-                    }
-                  });
-                }
-              },
-            )
+            _buildToggleButton()
           ],
         ),
         body: Center(
           child: Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.deepPurple)),
-              width: width * 0.85,
-              height: height * 0.75,
-              child: Swiper(
-                controller: _controller,
-                physics: NeverScrollableScrollPhysics(),
-                loop: false,
-                itemCount: widget.questions.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return _buildQuestionCard(
-                      widget.questions[index], width, height);
-                },
-              )),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.deepPurple)),
+            width: width * 0.85,
+            height: height * 0.75,
+            child: Swiper(
+              controller: _controller,
+              physics: NeverScrollableScrollPhysics(),
+              loop: false,
+              itemCount: widget.questions.length,
+              itemBuilder: (BuildContext context, int index) {
+                return _buildQuestionCard(width, height);
+              },
+            )
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildQuestionCard(Question question, double width, double height) {
+  Widget _buildToggleButton(){
+    return IconButton(
+      icon: _answeringMode == true
+          ? Icon(Icons.edit)
+          : Icon(Icons.check),
+      onPressed: () {
+        // when mode is changing 'answering' to 'editing'
+        if (_answeringMode == true) {
+          setState(() {
+            _answeringMode = false;
+            for(int i=0; i<widget.questions[_currentIndex].candNum; i++){
+              _editCandidates[i]=widget.questions[_currentIndex].candidates[i];
+            }
+          });
+        } else {
+          // when mode is changing 'editing' to 'answering'
+          setState(() {
+            _answeringMode = true;
+            print(_editCandidates);
+            for(int i=0; i<_editCandidates.length; i++){
+              String s = _editCandidates[i];
+              if(i>=widget.questions[_currentIndex].candNum){ // 추가된 선택지 반영
+                widget.questions[_currentIndex].candidates.add(s);
+                widget.questions[_currentIndex].candNum++;
+                _answerState.add(false);
+              }
+              else if(s!='') {
+                widget.questions[_currentIndex].candidates[i]=s;
+              }
+            }
+          });
+        }
+      },
+    );
+  }
+  Widget _buildQuestionCard(double width, double height) {
+    /* 기존에는 Question question을 파라미터로 받아왔으나,
+     * question의 내용을 수정해야 해서 
+     * local variable로는 쓸 수 없게 됨.
+     */
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -129,7 +132,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             padding: EdgeInsets.only(top: width * 0.012),
             // 자동으로 text size 조정
             child: AutoSizeText(
-              question.title,
+              widget.questions[_currentIndex].title,
               textAlign: TextAlign.center,
               maxLines: 2,
               style: TextStyle(
@@ -142,48 +145,47 @@ class _QuestionScreenState extends State<QuestionScreen> {
           //   child: Container(),
           // ),
           Column(
-            children: _buildCandidates(width, question),
+            children: _buildCandidates(width, widget.questions[_currentIndex]),
           ),
           Container(
-              padding: EdgeInsets.all(width * 0.024),
-              child: Visibility(
-                visible: _answeringMode,
-                child: Center(
-                  child: ButtonTheme(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.deepPurple,
-                        minimumSize: Size(width * 0.5, height * 0.05),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 15,
+            padding: EdgeInsets.all(width * 0.024),
+            child: Visibility(
+              visible: _answeringMode,
+              child: Center(
+                child: ButtonTheme(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.deepPurple,
+                      minimumSize: Size(width * 0.5, height * 0.05),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-
-                      // _answers[_currentIndex]가 -1이면 답변 체크가 안 된 것이므로
-                      // 다음으로 넘어가는 걸 막고, 체크가 됐다면 다음으로 넘어가기 위한 함수
-                      onPressed: _answers[_currentIndex] != -1
-                          ? () {
-                              // 마지막 질문이라면 결과창을 띄우기 위한 함수
-                              if (_currentIndex ==
-                                  widget.questions.length - 1) {
-                              } else {
-                                _currentIndex += 1;
-                                _answerState = List<bool>.filled(
-                                    question.candNum, false,
-                                    growable: true);
-                                _controller.next();
-                              }
-                            }
-                          : null,
-                      child: _currentIndex == widget.questions.length - 1
-                          ? Text('결과보기')
-                          : Text('다음문제'),
+                      elevation: 15,
                     ),
+
+                    // _answers[_currentIndex]가 -1이면 답변 체크가 안 된 것이므로
+                    // 다음으로 넘어가는 걸 막고, 체크가 됐다면 다음으로 넘어가기 위한 함수
+                    onPressed: _answers[_currentIndex] != -1
+                        ? () {
+                            // 마지막 질문이라면 결과창을 띄우기 위한 함수
+                            if (_currentIndex == widget.questions.length - 1) {
+                            } else {
+                              _currentIndex += 1;
+                              _answerState = List<bool>.filled(widget.questions[_currentIndex].candNum, false, growable: true);
+                              _editCandidates = List<String>.filled(widget.questions[_currentIndex].candNum, '', growable: true);
+                              _controller.next();
+                            }
+                          }
+                        : null,
+                    child: _currentIndex == widget.questions.length - 1
+                        ? Text('결과보기')
+                        : Text('다음문제'),
                   ),
                 ),
-              ))
+              ),
+            )
+          )
         ],
       ),
     );
