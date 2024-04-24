@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:my_diary/model/model_question.dart';
 import 'package:my_diary/widget/widget_candidate.dart';
@@ -20,8 +21,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
   int _currentIndex = 0;
   List<int> _answers = [-1, -1, -1];
   List<bool> _answerState = [false, false, false, false];
-  bool _answeringMode = true;
+  bool _answeringMode = true; // toggle with editing
   List<String> _editCandidates =[];
+  int _deleteIndex = -1;
 
   SwiperController _controller = SwiperController();
   _QuestionScreenState();
@@ -43,6 +45,21 @@ class _QuestionScreenState extends State<QuestionScreen> {
         backgroundColor: Colors.deepPurple,
         appBar: AppBar(
           actions: [
+            Visibility(
+              visible: !_answeringMode,
+              child: IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: (){
+                  setState(() {
+                    if(_deleteIndex!=-1){
+                      _editCandidates.removeAt(_deleteIndex);
+                      _answerState.removeAt(_deleteIndex);
+                      widget.questions[_currentIndex].candNum--;
+                    }
+                  });
+                } 
+              ),
+            ),
             _buildToggleButton()
           ],
         ),
@@ -141,9 +158,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
               ),
             ),
           ),
-          // Expanded(// 빈 Container인데, 이게 있어야 이후에 배치될 children들을 아래쪽으로 배치시킴.
-          //   child: Container(),
-          // ),
+          Expanded(// 빈 Container인데, 이게 있어야 이후에 배치될 children들을 아래쪽으로 배치시킴.
+            child: Container(),
+          ),
           Column(
             children: _buildCandidates(width, widget.questions[_currentIndex]),
           ),
@@ -221,18 +238,35 @@ class _QuestionScreenState extends State<QuestionScreen> {
       ));
     }
     } else{
+      
       for (int i = 0; i < _editCandidates.length; i++) {
         _children.add(
-          EditCandWidget(
-            index: i,
-            width: width,
-            hintText: _editCandidates[i],
-            onSubmitted: (value) {
-              setState(() {
-                print(_editCandidates);
-                _editCandidates[i] = value;
-              });
-            },
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Radio( 
+                value: i,
+                groupValue: _deleteIndex, 
+                onChanged: (value){
+                  setState(() {
+                    print(value);
+                    _deleteIndex = value!;
+
+                  });
+                }
+              ),
+              EditCandWidget(
+                index: i,
+                width: width,
+                hintText: _editCandidates[i],
+                onSubmitted: (value) {
+                  setState(() {
+                    print(_editCandidates);
+                    _editCandidates[i] = value;
+                  });
+                },
+              ),
+            ],
           ));
         _children.add(Padding(
           padding: EdgeInsets.all(width * 0.024),
