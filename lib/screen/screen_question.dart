@@ -1,6 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:my_diary/model/model_question.dart';
 import 'package:my_diary/widget/widget_candidate.dart';
@@ -226,6 +225,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               _answers[_currentIndex]=0;
             });
           },
+          readOnly: !_answeringMode,
         )
       );
     }
