@@ -13,7 +13,7 @@ class QuestionScreen extends StatefulWidget {
 
   @override
   State<QuestionScreen> createState() =>
-      _QuestionScreenState.withDetails(questions.length, questions[0].candNum);
+      _QuestionScreenState(questions.length, questions[0].candNum);
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
@@ -24,13 +24,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
   bool _answeringMode = true; // toggle with editing
   List<String> _editCandidates =[];
   int _deleteIndex = -1;
-
+  List<String> _answerString =[];
   SwiperController _controller = SwiperController();
-  _QuestionScreenState();
-  _QuestionScreenState.withDetails(this._quesNum, candNum) {
+
+  _QuestionScreenState(this._quesNum, candNum) {
     _answers = List<int>.filled(_quesNum, -1);
     _answerState = List<bool>.filled(candNum, false, growable: true);
     _editCandidates = List<String>.filled(candNum, '', growable: true);
+    _answerString = List<String>.filled(_quesNum, '');
   }
 
   @override
@@ -38,7 +39,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     Size screenSize = MediaQuery.of(context).size;
     double width = screenSize.width;
     double height = screenSize.height;
-    
+    double bodyHeight = height * 0.75;
     
     return SafeArea(
       child: Scaffold(
@@ -46,12 +47,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
         appBar: AppBar(
           actions: [
             Visibility(
-              visible: !_answeringMode,
+              visible: (!_answeringMode && widget.questions[_currentIndex].candNum>0),
               child: IconButton(
                 icon: Icon(Icons.delete),
                 onPressed: (){
                   setState(() {
-                    if(_deleteIndex!=-1){
+                    if(widget.questions[_currentIndex].candNum<=0){
+                      print("NO CANDIDATE TO DELETE");
+                    }else if(_deleteIndex!=-1 ){
                       _editCandidates.removeAt(_deleteIndex);
                       _answerState.removeAt(_deleteIndex);
                       widget.questions[_currentIndex].candNum--;
@@ -69,7 +72,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.deepPurple)),
             width: width * 0.85,
-            height: height * 0.75,
+            height: bodyHeight,
             child: Swiper(
               controller: _controller,
               physics: NeverScrollableScrollPhysics(),
@@ -158,11 +161,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
               ),
             ),
           ),
-          Expanded(// 빈 Container인데, 이게 있어야 이후에 배치될 children들을 아래쪽으로 배치시킴.
-            child: Container(),
-          ),
+          // Expanded(// 빈 Container인데, 이게 있어야 이후에 배치될 children들을 아래쪽으로 배치시킴.
+          //   child: Container(),
+          // ),
           Column(
-            children: _buildCandidates(width, widget.questions[_currentIndex]),
+            children: _buildAnswers(width, height, widget.questions[_currentIndex]),
           ),
           Container(
             padding: EdgeInsets.all(width * 0.024),
@@ -208,37 +211,54 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
-  List<Widget> _buildCandidates(double width, Question question) {
+  List<Widget> _buildAnswers(double width, double height, Question question) {
     List<Widget> _children = [];
-    if(_answeringMode==true){
-      for (int i = 0; i < question.candNum; i++) {
-        _children.add(CandWidget(
-          index: i,
-          width: width,
-          text: question.candidates[i],
-          answerState: _answerState[i],
-          tap: () {
-            setState(() { // tap한 선택지는 true로 나머지는 false로 토글하고 선택한 답 저장
-              for (int j = 0; j < question.candNum; j++) {
-                if (j == i) {
-                  _answerState[j] = true;
-                  _answers[_currentIndex] = j;
-                  // print(_answers[_currentIndex]); // 누른 선택지 확인
-                  //print(width); //  기기 너비 확인
-                } else {
-                  _answerState[j] = false;
-                }
-              }
+    if(question.candNum<=0){ // free answer
+      _children.add(
+        TextField(
+          decoration: InputDecoration(
+            constraints: BoxConstraints(maxWidth: width*0.7),
+          ),
+          onSubmitted:(value) {
+            setState(() {
+              print(value);
+              _answerString[_currentIndex]=value;
+              _answers[_currentIndex]=0;
             });
           },
         )
       );
-      _children.add(Padding(
-        padding: EdgeInsets.all(width * 0.024),
-      ));
     }
-    } else{
-      
+    if(_answeringMode==true){ // answer by candidate 
+      for (int i = 0; i < question.candNum; i++) {
+        _children.add(
+          CandWidget(
+            index: i,
+            width: width,
+            text: question.candidates[i],
+            answerState: _answerState[i],
+            tap: () {
+              setState(() { // tap한 선택지는 true로 나머지는 false로 토글하고 선택한 답 저장
+                for (int j = 0; j < question.candNum; j++) {
+                  if (j == i) {
+                    _answerState[j] = true;
+                    _answers[_currentIndex] = j;
+                    // print(_answers[_currentIndex]); // 누른 선택지 확인
+                    //print(width); //  기기 너비 확인
+                  } else {
+                    _answerState[j] = false;
+                  }
+                }
+              });
+            },
+          )
+        );
+        _children.add(Padding(
+          padding: EdgeInsets.all(height * 0.018),
+        ));
+      }
+    }
+    else{// edit candidate 
       for (int i = 0; i < _editCandidates.length; i++) {
         _children.add(
           Row(

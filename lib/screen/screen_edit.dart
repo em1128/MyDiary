@@ -113,7 +113,7 @@ class _EditScreenState extends State<EditScreen> {
       _children.add(
         CandWidget(
           index: i, 
-          width: width, 
+          width: width,
           text: question.candidates[i], 
           answerState: false,
           tap: (){}, 

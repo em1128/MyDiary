@@ -15,19 +15,25 @@ class _HomeScreenState extends State<HomeScreen>{
       'title': 'question',
       'candidates': ['a', 'b', 'c', 'd'],
       'answer': 0,
-      'candNum': 4
+      'candNum': 4,
     }),
     Question.fromMap({
       'title': 'question',
       'candidates': ['e', 'f', 'g', 'h'],
       'answer': 0,
-      'candNum': 4
+      'candNum': 4,
     }),
     Question.fromMap({
       'title': 'question',
       'candidates': ['a', 'b', 'c', 'd'],
       'answer': 0,
-      'candNum': 4
+      'candNum': 4,
+    }),
+    Question.fromMap({
+      'title': 'question',
+      'candidates': [''],
+      'answer': 0,
+      'candNum': 0,
     }),
   ];
   @override
