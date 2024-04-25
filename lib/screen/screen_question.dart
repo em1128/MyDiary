@@ -217,15 +217,20 @@ class _QuestionScreenState extends State<QuestionScreen> {
         TextField(
           decoration: InputDecoration(
             constraints: BoxConstraints(maxWidth: width*0.7),
+            counterText: '',
           ),
-          onSubmitted:(value) {
+          maxLength: 800,
+          maxLines: null,
+          textInputAction: TextInputAction.newline,
+          onChanged:(value) {
             setState(() {
-              print(value);
               _answerString[_currentIndex]=value;
               _answers[_currentIndex]=0;
             });
           },
+          
           readOnly: !_answeringMode,
+          autofocus: true,
         )
       );
     }
