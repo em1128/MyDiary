@@ -38,6 +38,7 @@ class _EditCandWidgetState extends State<EditCandWidget> {
 
       child: TextField(
         autofocus: true,
+        maxLines: 1,
         decoration: InputDecoration(
           hintText:widget.hintText,
           border: InputBorder.none

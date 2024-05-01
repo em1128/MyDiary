@@ -11,31 +11,38 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>{
   List<Question> questions = [
-    Question.fromMap({
-      'title': 'question',
-      'candidates': [''],
-      'answer': 0,
-      'candNum': 0,
-    }),
-    Question.fromMap({
-      'title': 'question',
-      'candidates': ['a', 'b', 'c', 'd'],
-      'answer': 0,
-      'candNum': 4,
-    }),
-    Question.fromMap({
-      'title': 'question',
-      'candidates': ['e', 'f', 'g', 'h'],
-      'answer': 0,
-      'candNum': 4,
-    }),
+    // Question.fromMap({
+    //   'title': 'question',
+    //   'candidates': [''],
+    //   'ansCand': -1,
+    //   'ansStr': '',
+    //   'rating': false,
+    //   'candNum': 0,
+    // }),
     Question.fromMap({
       'title': 'question',
       'candidates': ['a', 'b', 'c', 'd'],
-      'answer': 0,
+      'ansCand': -1,
+      'ansStr': '',
+      'rating': false,
       'candNum': 4,
     }),
-    
+    // Question.fromMap({
+    //   'title': 'question',
+    //   'candidates': ['e', 'f', 'g', 'h'],
+    //   'ansCand': -1,
+    //   'ansStr': '',
+    //   'rating': false,
+    //   'candNum': 4,
+    // }),
+    // Question.fromMap({
+    //   'title':'오늘 하루의 별점을 매겨주세요!',
+    //   'candidates':[''],
+    //   'ansCand': -1,
+    //   'ansStr': '',
+    //   'rating':true,
+    //   'candNum':0,
+    // }),
   ];
   @override
   Widget build(BuildContext context){
@@ -43,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen>{
     Size screenSize = MediaQuery.of(context).size;
     double width = screenSize.width;
     double height = screenSize.height;
-
+    
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(

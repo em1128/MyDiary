@@ -2,8 +2,10 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:my_diary/model/model_question.dart';
+import 'package:my_diary/screen/screen_result.dart';
 import 'package:my_diary/widget/widget_candidate.dart';
 import 'package:my_diary/widget/widget_edit_cand.dart';
+import 'package:my_diary/widget/widget_free_answer.dart';
 
 class QuestionScreen extends StatefulWidget {
   List<Question> questions;
@@ -186,9 +188,18 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     // _answers[_currentIndex]가 -1이면 답변 체크가 안 된 것이므로
                     // 다음으로 넘어가는 걸 막고, 체크가 됐다면 다음으로 넘어가기 위한 함수
                     onPressed: _answers[_currentIndex] != -1
-                        ? () {
-                            // 마지막 질문이라면 결과창을 띄우기 위한 함수
+                        ? () { 
                             if (_currentIndex == widget.questions.length - 1) {
+                              // 마지막 질문이라면 결과창을 띄움
+                              Navigator.push(
+                                context, 
+                                MaterialPageRoute(
+                                  builder: (context) => ResultScreen(
+                                    answers: _answers, 
+                                    questions: widget.questions
+                                  ),
+                                ),
+                              );
                             } else {
                               _currentIndex += 1;
                               _answerState = List<bool>.filled(widget.questions[_currentIndex].candNum, false, growable: true);
@@ -214,25 +225,17 @@ class _QuestionScreenState extends State<QuestionScreen> {
     List<Widget> _children = [];
     if(question.candNum<=0){ // free answer
       _children.add(
-        TextField(
-          decoration: InputDecoration(
-            constraints: BoxConstraints(maxWidth: width*0.7),
-            counterText: '',
-          ),
-          maxLength: 800,
-          maxLines: null,
-          textInputAction: TextInputAction.newline,
-          onChanged:(value) {
-            setState(() {
-              _answerString[_currentIndex]=value;
-              _answers[_currentIndex]=0;
-            });
-          },
-          
-          readOnly: !_answeringMode,
-          autofocus: true,
-        )
-      );
+          FreeAnaswerWidget(
+            width: width, 
+            answeringMode: _answeringMode, 
+            onChanged:(value){
+              setState(() {
+                _answerString[_currentIndex]=value;
+                _answers[_currentIndex]=0;
+              });
+            }, 
+          )
+        );
     }
     if(_answeringMode==true){ // answer by candidate 
       for (int i = 0; i < question.candNum; i++) {
