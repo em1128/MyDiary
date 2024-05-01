@@ -95,7 +95,7 @@ class ResultScreen extends StatelessWidget{
             ),
           ),
           bottomSheet: Container(
-            padding: EdgeInsets.only(bottom: width * 0.012),
+            padding: EdgeInsets.only(bottom: width * 0.048),
             child: ButtonTheme(
               minWidth: width * 0.73,
               height: height * 0.05,
