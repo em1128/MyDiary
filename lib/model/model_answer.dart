@@ -10,10 +10,5 @@ class Answer{
     qID = map['qID'],
     ansCand = map['ansCand'],
     ansStr = map['ansStr'];
-
-  addAnswer(int? cand, String? str){
-    ansCand = cand!;
-    ansStr = str!;
-  }
   
 }

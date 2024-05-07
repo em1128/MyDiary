@@ -14,7 +14,7 @@ class ResultScreen extends StatelessWidget{
     Size screenSize = MediaQuery.of(context).size;
     double width = screenSize.width;
     double height = screenSize.height;
-    List<String> goodSentence = ['인생은 자전거를 타는 것과 같다. 균형을 잡으려면 움직여야 한다.'];
+    List<String> quotes = ['인생은 자전거를 타는 것과 같다. 균형을 잡으려면 움직여야 한다.'];
     return PopScope(
       canPop: false,
       child: SafeArea(
@@ -59,7 +59,7 @@ class ResultScreen extends StatelessWidget{
                           ),
                         ),
                         Text(
-                          goodSentence[0], 
+                          quotes[0], 
                           style: TextStyle(
                             fontSize: width * 0.048,
                             fontWeight: FontWeight.bold,
