@@ -1,10 +1,11 @@
 
 import 'package:flutter/material.dart';
+import 'package:my_diary/model/model_answer.dart';
 import 'package:my_diary/model/model_question.dart';
 import 'package:my_diary/screen/screen_home.dart';
 
 class ResultScreen extends StatelessWidget{
-  List<int> answers;
+  List<Answer> answers;
   List<Question> questions;
   ResultScreen({required this.answers, required this.questions});
 
@@ -13,13 +14,7 @@ class ResultScreen extends StatelessWidget{
     Size screenSize = MediaQuery.of(context).size;
     double width = screenSize.width;
     double height = screenSize.height;
-    int score = 0;
-    for(int i=0; i<questions.length; i++){
-      if(questions[i].ansCand == answers[i]){
-        score +=1 ;
-      }
-    }
-
+    List<String> goodSentence = ['인생은 자전거를 타는 것과 같다. 균형을 잡으려면 움직여야 한다.'];
     return PopScope(
       canPop: false,
       child: SafeArea(
@@ -64,21 +59,10 @@ class ResultScreen extends StatelessWidget{
                           ),
                         ),
                         Text(
-                          '당신의 점수는', 
+                          goodSentence[0], 
                           style: TextStyle(
                             fontSize: width * 0.048,
                             fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Expanded( // 나머지가 아래쪽으로 배치되도록 Container 추가
-                          child: Container()
-                        ),
-                        Text(
-                          score.toString() + '/' + questions.length.toString(),
-                          style: TextStyle(
-                            fontSize: width * 0.21,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
                           ),
                         ),
                         Padding(

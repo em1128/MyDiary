@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:my_diary/model/model_answer.dart';
 import 'package:my_diary/model/model_question.dart';
 import 'package:my_diary/screen/screen_create.dart';
 import 'package:my_diary/screen/screen_question.dart';
+import 'package:my_diary/screen/screen_stat.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -11,46 +13,45 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>{
   List<Question> questions = [
-    // Question.fromMap({
-    //   'title': 'question',
-    //   'candidates': [''],
-    //   'ansCand': -1,
-    //   'ansStr': '',
-    //   'rating': false,
-    //   'candNum': 0,
-    // }),
     Question.fromMap({
+      'qID': 1,
+      'title': 'question',
+      'candidates': [''],
+      'rating': false,
+      'candNum': 0,
+    }),
+    Question.fromMap({
+      'qID': 2,
       'title': 'question',
       'candidates': ['a', 'b', 'c', 'd'],
-      'ansCand': -1,
-      'ansStr': '',
       'rating': false,
       'candNum': 4,
     }),
-    // Question.fromMap({
-    //   'title': 'question',
-    //   'candidates': ['e', 'f', 'g', 'h'],
-    //   'ansCand': -1,
-    //   'ansStr': '',
-    //   'rating': false,
-    //   'candNum': 4,
-    // }),
-    // Question.fromMap({
-    //   'title':'오늘 하루의 별점을 매겨주세요!',
-    //   'candidates':[''],
-    //   'ansCand': -1,
-    //   'ansStr': '',
-    //   'rating':true,
-    //   'candNum':0,
-    // }),
+    Question.fromMap({
+      'qID':3,
+      'title': 'question',
+      'candidates': ['e', 'f', 'g', 'h'],
+      'rating': false,
+      'candNum': 4,
+    }),
+    Question.fromMap({
+      'qID':4,
+      'title':'오늘 하루의 별점을 매겨주세요!',
+      'candidates':[''],
+      'rating':true,
+      'candNum':0,
+    }),
   ];
+  // List<Answer> answers = [
+    
+  // ];
   @override
   Widget build(BuildContext context){
     //MediaQuery 적용
     Size screenSize = MediaQuery.of(context).size;
     double width = screenSize.width;
     double height = screenSize.height;
-    
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -137,6 +138,33 @@ class _HomeScreenState extends State<HomeScreen>{
                       },
                       child: const Text(
                         '수정',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(width * 0.024),
+                  ),
+                  ButtonTheme(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        minimumSize: Size(width * 0.8, height * 0.05),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () {
+                        // Navigator.push(
+                        //   context, 
+                        //   MaterialPageRoute(
+                        //     builder: (context) => StatScreen(
+                        //       answers: answers, questions: questions,
+                        //     ),
+                        //   ),
+                        // );
+                      },
+                      child: const Text(
+                        '통계',
                         style: TextStyle(color: Colors.white),
                       ),
                       

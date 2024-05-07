@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
+import 'package:my_diary/model/model_answer.dart';
 import 'package:my_diary/model/model_question.dart';
 import 'package:my_diary/screen/screen_result.dart';
 import 'package:my_diary/widget/widget_candidate.dart';
@@ -20,19 +21,18 @@ class QuestionScreen extends StatefulWidget {
 class _QuestionScreenState extends State<QuestionScreen> {
   int _quesNum = 3;
   int _currentIndex = 0;
-  List<int> _answers = [-1, -1, -1];
-  List<bool> _answerState = [false, false, false, false];
+  List<Answer> answers=[Answer.fromMap({'qID':0,'ansCand':0,'ansStr':''})];
+  bool _isAnswer = false;
+  List<bool> answerState=[];
   bool _answeringMode = true; // toggle with editing
-  List<String> _editCandidates =[];
+  List<String> tempCandidates =[]; // this is used for editing
   int _deleteIndex = -1;
-  List<String> _answerString =[];
   SwiperController _controller = SwiperController();
 
   _QuestionScreenState(this._quesNum, candNum) {
-    _answers = List<int>.filled(_quesNum, -1);
-    _answerState = List<bool>.filled(candNum, false, growable: true);
-    _editCandidates = List<String>.filled(candNum, '', growable: true);
-    _answerString = List<String>.filled(_quesNum, '');
+    answerState = List<bool>.filled(candNum, false, growable: true);
+    tempCandidates = List<String>.filled(candNum, '', growable: true);
+    answers = List<Answer>.generate(_quesNum, (index) => Answer.fromMap({'qID':index,'ansCand':0,'ansStr':''}), growable: true);
   }
 
   @override
@@ -56,8 +56,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     if(widget.questions[_currentIndex].candNum<=0){
                       print("NO CANDIDATE TO DELETE");
                     }else if(_deleteIndex!=-1 ){
-                      _editCandidates.removeAt(_deleteIndex);
-                      _answerState.removeAt(_deleteIndex);
+                      tempCandidates.removeAt(_deleteIndex);
+                      answerState.removeAt(_deleteIndex);
                       widget.questions[_currentIndex].candNum--;
                     }
                   });
@@ -100,20 +100,20 @@ class _QuestionScreenState extends State<QuestionScreen> {
           setState(() {
             _answeringMode = false;
             for(int i=0; i<widget.questions[_currentIndex].candNum; i++){
-              _editCandidates[i]=widget.questions[_currentIndex].candidates[i];
+              tempCandidates[i]=widget.questions[_currentIndex].candidates[i];
             }
           });
         } else {
           // when mode is changing 'editing' to 'answering'
           setState(() {
             _answeringMode = true;
-            print(_editCandidates);
-            for(int i=0; i<_editCandidates.length; i++){
-              String s = _editCandidates[i];
+            print(tempCandidates);
+            for(int i=0; i<tempCandidates.length; i++){
+              String s = tempCandidates[i];
               if(i>=widget.questions[_currentIndex].candNum){ // 추가된 선택지 반영
                 widget.questions[_currentIndex].candidates.add(s);
                 widget.questions[_currentIndex].candNum++;
-                _answerState.add(false);
+                answerState.add(false);
               }
               else if(s!='') {
                 widget.questions[_currentIndex].candidates[i]=s;
@@ -185,9 +185,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       elevation: 15,
                     ),
 
-                    // _answers[_currentIndex]가 -1이면 답변 체크가 안 된 것이므로
+                    // _isAnswer가 false이면 답변 체크가 안 된 것이므로
                     // 다음으로 넘어가는 걸 막고, 체크가 됐다면 다음으로 넘어가기 위한 함수
-                    onPressed: _answers[_currentIndex] != -1
+                    onPressed: _isAnswer
                         ? () { 
                             if (_currentIndex == widget.questions.length - 1) {
                               // 마지막 질문이라면 결과창을 띄움
@@ -195,15 +195,16 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                 context, 
                                 MaterialPageRoute(
                                   builder: (context) => ResultScreen(
-                                    answers: _answers, 
+                                    answers: answers, 
                                     questions: widget.questions
                                   ),
                                 ),
                               );
                             } else {
                               _currentIndex += 1;
-                              _answerState = List<bool>.filled(widget.questions[_currentIndex].candNum, false, growable: true);
-                              _editCandidates = List<String>.filled(widget.questions[_currentIndex].candNum, '', growable: true);
+                              _isAnswer = false;
+                              answerState = List<bool>.filled(widget.questions[_currentIndex].candNum, false, growable: true);
+                              tempCandidates = List<String>.filled(widget.questions[_currentIndex].candNum, '', growable: true);
                               _controller.next();
                             }
                           }
@@ -230,8 +231,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
             answeringMode: _answeringMode, 
             onChanged:(value){
               setState(() {
-                _answerString[_currentIndex]=value;
-                _answers[_currentIndex]=0;
+                _isAnswer = true;
+                answers[_currentIndex].qID = _currentIndex+1;
+                answers[_currentIndex].ansStr = value;
               });
             }, 
           )
@@ -244,17 +246,19 @@ class _QuestionScreenState extends State<QuestionScreen> {
             index: i,
             width: width,
             text: question.candidates[i],
-            answerState: _answerState[i],
+            answerState: answerState[i],
             tap: () {
               setState(() { // tap한 선택지는 true로 나머지는 false로 토글하고 선택한 답 저장
                 for (int j = 0; j < question.candNum; j++) {
                   if (j == i) {
-                    _answerState[j] = true;
-                    _answers[_currentIndex] = j;
-                    // print(_answers[_currentIndex]); // 누른 선택지 확인
+                    answerState[j] = true;
+                    _isAnswer = true;
+                    answers[_currentIndex].qID = _currentIndex+1;
+                    answers[_currentIndex].ansCand = j;
+                    // print(answers[_currentIndex].ansCand); // 누른 선택지 확인
                     //print(width); //  기기 너비 확인
                   } else {
-                    _answerState[j] = false;
+                    answerState[j] = false;
                   }
                 }
               });
@@ -267,7 +271,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       }
     }
     else{// edit candidate 
-      for (int i = 0; i < _editCandidates.length; i++) {
+      for (int i = 0; i < tempCandidates.length; i++) {
         _children.add(
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -286,11 +290,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
               EditCandWidget(
                 index: i,
                 width: width,
-                hintText: _editCandidates[i],
+                hintText: tempCandidates[i],
                 onSubmitted: (value) {
                   setState(() {
-                    print(_editCandidates);
-                    _editCandidates[i] = value;
+                    print(tempCandidates);
+                    tempCandidates[i] = value;
                   });
                 },
               ),
@@ -303,11 +307,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
       _children.add(IconButton(
         onPressed: () {
           setState(() {
-            _editCandidates.add('');
+            tempCandidates.add('');
           });
         },
         icon: Icon(Icons.add)));
     }
     return _children;
   }
+
 }
